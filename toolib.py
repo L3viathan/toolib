@@ -14,22 +14,22 @@ def eprint(*args, **kwargs):
 class DirectedGraph:
     def __init__(self):
         self.nodes = set()
-        self.edges_in = defaultdict(set)
+        self.edges_out = defaultdict(set)
         self.edges_in = defaultdict(set)
 
     def add_edge(self, src, tgt):
-        self.edges_in[src].add(tgt)
+        self.edges_out[src].add(tgt)
         self.edges_in[tgt].add(src)
         self.nodes.add(src)
         self.nodes.add(tgt)
 
     def has_edge(self, src, tgt):
-        return tgt in self.edges_in[src]
+        return tgt in self.edges_out[src]
 
     def edges(self):
         array = []
-        for src in self.edges_in:
-            for tgt in self.edges_in[src]:
+        for src in self.edges_out:
+            for tgt in self.edges_out[src]:
                 array.append((src, tgt))
         return array
 
@@ -37,13 +37,13 @@ class DirectedGraph:
         return len(self.edges_in[node])
 
     def outdeg(self, node):
-        return len(self.edges_in[node])
+        return len(self.edges_out[node])
 
     def neighbors(self, node):
-        return union(self.edges_in[node], self.edges_in[node])
+        return union(self.edges_in[node], self.edges_out[node])
 
     def has_cycle(self):
-        extended_edges = self.edges_in.copy()
+        extended_edges = self.edges_out.copy()
         change = True
         while change:
             change = False
@@ -63,7 +63,7 @@ class DirectedGraph:
             if node not in visited:
                 visited.add(node)
                 yield node
-                stack.extend(self.edges_in[node])
+                stack.extend(self.edges_out[node])
 
     def bfs(self, node):
         for x in self.dfs(node, deque.popleft):
