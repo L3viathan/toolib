@@ -378,3 +378,15 @@ def runtime(how_many_tries=10):
 def eprint(*args, **kwargs):
     '''Print to stderr. Convenience function'''
     print(*args, file=sys.stderr, **kwargs)
+
+
+def nop(something):
+    '''This is the third way to solve the generators-with-arguments problem.
+    Since you can't use lambda expressions as decorators, this is a way around
+    that. You can just wrap the lambda expression in a nop()-call.
+
+    @nop(lambda x: some_generator_with_args(x, arg1, ...))
+    def foo():
+        pass
+    '''
+    return something
