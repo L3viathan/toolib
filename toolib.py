@@ -6,77 +6,91 @@ import operator
 from functools import reduce
 from collections import defaultdict, deque
 
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
+
 class DirectedGraph:
     def __init__(self):
-        self.knoten = set()
-        self.kanten_raus = defaultdict(set)
-        self.kanten_rein = defaultdict(set)
+        self.nodes = set()
+        self.edges_in = defaultdict(set)
+        self.edges_in = defaultdict(set)
+
     def add_edge(self, src, tgt):
-        self.kanten_raus[src].add(tgt)
-        self.kanten_rein[tgt].add(src)
-        self.knoten.add(src)
-        self.knoten.add(tgt)
+        self.edges_in[src].add(tgt)
+        self.edges_in[tgt].add(src)
+        self.nodes.add(src)
+        self.nodes.add(tgt)
+
     def has_edge(self, src, tgt):
-        return tgt in self.kanten_raus[src]
+        return tgt in self.edges_in[src]
+
     def edges(self):
         array = []
-        for src in self.kanten_raus:
-            for tgt in self.kanten_raus[src]:
-            array.append((src,tgt))
+        for src in self.edges_in:
+            for tgt in self.edges_in[src]:
+                array.append((src, tgt))
         return array
-    def nodes(self):
-        return self.knoten
+
     def indeg(self, node):
-        return len(self.kanten_rein[node])
+        return len(self.edges_in[node])
+
     def outdeg(self, node):
-        return len(self.kanten_raus[node])
+        return len(self.edges_in[node])
+
     def neighbors(self, node):
-        return union(self.kanten_rein[node],self.kanten_raus[node])
+        return union(self.edges_in[node], self.edges_in[node])
+
     def has_cycle(self):
-        extended_edges = self.kanten_raus.copy()
+        extended_edges = self.edges_in.copy()
         change = True
         while change:
             change = False
-            for node in self.knoten:
-            for tgt in extended_edges[node].copy():
-                for element in extended_edges[tgt]:
-                if element not in extended_edges[node]:
-                    extended_edges[node].add(element)
-                    change=True
-        return any(x in extended_edges[x] for x in self.knoten)
+            for node in self.nodes:
+                for tgt in extended_edges[node].copy():
+                    for element in extended_edges[tgt]:
+                        if element not in extended_edges[node]:
+                            extended_edges[node].add(element)
+                            change = True
+        return any(x in extended_edges[x] for x in self.nodes)
 
-    def dfs(self, node, func = deque.pop):
+    def dfs(self, node, func=deque.pop):
         visited = set()
         stack = deque([node])
         while stack:
             node = func(stack)
             if node not in visited:
-            visited.add(node)
-            yield node
-            stack.extend(self.kanten_raus[node])
+                visited.add(node)
+                yield node
+                stack.extend(self.edges_in[node])
+
     def bfs(self, node):
-        for x in self.dfs(node,deque.popleft):
+        for x in self.dfs(node, deque.popleft):
             yield x
-    # Topologische Sortierung
+
     def tsort(self):
+        '''Topological sort'''
         tlist = []
-        active_nodes = self.knoten.copy()
+        active_nodes = self.nodes.copy()
         while active_nodes:
             for node in list(active_nodes):
-            if len([x for x in self.kanten_rein[node] if x in active_nodes]) == 0:
-                tlist.append(node)
-                active_nodes.remove(node)
+                if not [x for x in self.edges_in[node] if x in active_nodes]:
+                    tlist.append(node)
+                    active_nodes.remove(node)
         return tlist
+
 
 class Heap(list):
     '''A lightweight heap essentially utilizing the heapq module, but with the
     ability to supply a key argument on initialization. The heap itself is a
     list of tuples of (key, element), but popping is transparent.'''
-    def __init__(self, initial=None, key=lambda x:x):
-        self.key=key
+    def __init__(self, initial=None, key=lambda x: x):
+        self.key = key
         if initial:
-            self.extend((key(item),item) for item in initial)
+            self.extend((key(item), item) for item in initial)
             heapq.heapify(self)
+
     def push(self, item):
         '''Push an element on the heap'''
         heapq.heappush(self, (self.key(item), item))
@@ -94,6 +108,7 @@ class Heap(list):
         '''Push an element on the heap, then pop and return the smallest item.
         More efficient then first pushing and then popping.'''
         return heapq.heappushpop(self, (self.key(item), item))[1]
+
 
 class Tree(object):
     '''Parse tree'''
@@ -119,13 +134,18 @@ class Tree(object):
     @staticmethod
     def _tokenize(string):
         '''Simple tokenization helper function for from_string'''
-        #reversed because popleft isn't O(1)
+        # reversed because popleft isn't O(1)
         return list(reversed(re.findall(r'\(|\)|[^ ()]+', string)))
 
     @classmethod
     def from_qtree(cls, string):
         '''Takes something like "(S (NP Peter))" and returns a tree'''
-        string = string.replace("\\Tree ","").replace("[","(").replace("]",")").replace(".","")
+        string = (string
+                  .replace("\\Tree ", "")
+                  .replace("[", "(")
+                  .replace("]", ")")
+                  .replace(".", "")
+                  )
         return cls.from_string(string)
 
     @classmethod
@@ -139,9 +159,9 @@ class Tree(object):
         '''This builds a single tree from the token list. To do that, it first
         checks whether the current token is a leaf (in which case it just
         returns that simple tree), and if not, creates a new tree with the next
-        token as a label and then calls _trees, which yields trees until it sees
-        the closing paranthesis in the current level. In that case we're done
-        adding children and can return the tree.'''
+        token as a label and then calls _trees, which yields trees until it
+        sees the closing paranthesis in the current level. In that case we're
+        done adding children and can return the tree.'''
         t = tokens.pop()
         # if t is a paranthesis, we need to nest
         if t == '(':
@@ -176,13 +196,22 @@ class Tree(object):
     def _repr(self):
         '''Recursive helper function for __repr__, because we want the wrapper
         "Tree.from_string" only on the top level.'''
-        return self.label if self.leaf else '({} '.format(self.label) + ' '.join(child._repr() for child in self.children) + ')'
+        if self.leaf:
+            return self.label
+        else:
+            kids = ' '.join(child._repr() for child in self.children)
+            return '({} {})'.format(self.label, kids)
 
     def qtree(self):
         return "\\Tree " + self._qtree()
+
     def _qtree(self):
         '''Export in qtree format'''
-        return self.label if self.leaf else '[.{} '.format(self.label) + ' '.join(child._qtree() for child in self.children) + ' ]'
+        if self.leaf:
+            return self.label
+        else:
+            kids = ' '.join(child._qtree() for child in self.children)
+            return '[.{} {}]'.format(self.label, kids)
 
     def walk(self):
         '''Yields itself and then recursively all decendents. DFS.'''
@@ -209,13 +238,16 @@ class Tree(object):
 
     def empty(self):
         '''Empties the children list, turning the node into a leaf.'''
-        #actually emptying the list
+        # actually emptying the list
         del self.children[:]
     __iter__ = walk
+
     def __getitem__(self, index):
         return self.children[index]
+
     def __copy__(self):
         return type(self).from_string(self._repr())
+
     def __getattr__(self, name):
         '''More usability. If there's only one node of the name, return it'''
         ret = None
@@ -225,6 +257,7 @@ class Tree(object):
                     raise AttributeError("More than one node of type {}".format(name))
                 ret = child
         return ret
+
 
 class PTree(Tree):
     '''Parse tree with probabilities'''
@@ -245,7 +278,11 @@ class PTree(Tree):
         '''Recursive helper function for __repr__, because we want the wrapper
         "Tree.from_string" only on the top level.'''
         annotated_label = self.label + (":" + str(self.prob) if self.prob != 1 else "")
-        return annotated_label if self.leaf else '({} '.format(annotated_label) + ' '.join(child._repr() for child in self.children) + ')'
+        if self.leaf:
+            return annotated_label
+        else:
+            kids = ' '.join(child._repr() for child in self.children) + ')'
+            return '({} {})'.format(annotated_label, kids)
 
     @classmethod
     def _tree(cls, tokens):
@@ -265,6 +302,7 @@ class PTree(Tree):
         else:
             return cls(*t.split(":"))
 
+
 def parametrized(dec):
     '''This is a decorator for decorators that turns them into functions taking
     arguments and returning said decorator without the additional parameters.
@@ -278,6 +316,7 @@ def parametrized(dec):
             return dec(f, *args, **kwargs)
         return repl
     return layer
+
 
 def fmap(fn, *args, **kwargs):
     '''Takes a function, and optionally some arguments, and returns it as a
@@ -294,10 +333,13 @@ def fmap(fn, *args, **kwargs):
         return fn(inner_fn, *args, **kwargs)
     return decorator
 
+
 def nested_loop(n, l):
     '''Returns n-tuples counting up range(l) individually. As should be obvious
     from the name, this is a replacement for deeply nested loops.'''
+    # intentionally violating PEP 8.
     return ((tuple((c // l**x % l for x in reversed(range(n))))) for c in range(l**n))
+
 
 def argmap(map_fn):
     '''Decorator to perform some transformation on the arguments.
@@ -309,18 +351,19 @@ def argmap(map_fn):
         return wrapper
     return decorator
 
+
 def runtime(how_many_tries=10):
     def decorator(fn):
         def wrapper(*args, **kwargs):
-            print("Timing {} with {} tries".format(fn.__name__, how_many_tries), file=sys.stderr)
+            eprint("Timing {} with {} tries".format(fn.__name__, how_many_tries))
             times = []
             for i in range(how_many_tries):
                 beginning = time.time()
                 ret = fn(*args, **kwargs)
                 runtime = time.time() - beginning
                 times.append(runtime)
-                print("Run {0} completed in {1:.3f} seconds".format(i+1, runtime), file=sys.stderr)
-            print("All runs done. Average time: {0:.3f}".format(sum(times)/len(times)), file=sys.stderr)
+                eprint("Run {0} completed in {1:.3f} seconds".format(i+1, runtime))
+            eprint("All runs done. Average time: {0:.3f}".format(sum(times)/len(times)))
             return ret
         return wrapper
     return decorator
