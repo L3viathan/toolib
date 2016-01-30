@@ -7,11 +7,8 @@ from functools import reduce
 from collections import defaultdict, deque
 
 
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
-
-
 class DirectedGraph:
+    '''Directed Graph, came from a homework solution'''
     def __init__(self):
         self.nodes = set()
         self.edges_out = defaultdict(set)
@@ -337,13 +334,21 @@ def fmap(fn, *args, **kwargs):
 def nested_loop(n, l):
     '''Returns n-tuples counting up range(l) individually. As should be obvious
     from the name, this is a replacement for deeply nested loops.'''
-    # intentionally violating PEP 8.
+    # intentionally violating PEP 8, because it's not readable anyways.
     return ((tuple((c // l**x % l for x in reversed(range(n))))) for c in range(l**n))
 
 
 def argmap(map_fn):
     '''Decorator to perform some transformation on the arguments.
     Example usage:
+    @argmap(my_function, 1, 2, 3)
+    def foo(bar):
+        pass
+
+    becomes:
+
+    ...
+    foo = my_function(foo, 1, 2, 3)
     '''
     def decorator(fn):
         def wrapper(*args, **kwargs):
@@ -353,6 +358,7 @@ def argmap(map_fn):
 
 
 def runtime(how_many_tries=10):
+    '''Decorator to measure the runtime of a function.'''
     def decorator(fn):
         def wrapper(*args, **kwargs):
             eprint("Timing {} with {} tries".format(fn.__name__, how_many_tries))
@@ -367,3 +373,8 @@ def runtime(how_many_tries=10):
             return ret
         return wrapper
     return decorator
+
+
+def eprint(*args, **kwargs):
+    '''Print to stderr. Convenience function'''
+    print(*args, file=sys.stderr, **kwargs)
