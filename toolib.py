@@ -1,9 +1,11 @@
-"""toolib - the module I put stuff in if I think I'll need it later."""
+"""L3viathan's universal module for stuff he thinks he'll need later."""
 
 import heapq
 import time
 import sys
 import re
+import termios
+import tty
 import operator
 from functools import reduce
 from collections import defaultdict, deque
@@ -19,7 +21,13 @@ class DirectedGraph:
         self.edges_in = defaultdict(set)
 
     def add_edge(self, source, target):
-        """Add an edge to the graph. source and target are existing nodes."""
+        """
+        Add an edge to the graph.
+
+        source and target are either existing nodes, or newly created.
+        Yes, that does sound like a bad idea, but I didn't make the homework.
+        I guess I'll make the whole class more reasonable later.
+        """
         self.edges_out[source].add(target)
         self.edges_in[target].add(source)
         self.nodes.add(source)
@@ -475,3 +483,15 @@ def nop(something):
         pass
     """
     return something
+
+
+def getchr():
+    """Get a single key from the terminal without printing it."""
+    fd = sys.stdin.fileno()
+    old = termios.tcgetattr(fd)
+    tty.setraw(sys.stdin.fileno())
+    ch = sys.stdin.read(1)
+    termios.tcsetattr(fd, termios.TCSADRAIN, old)
+    if ord(ch) == 3:  # ^C
+        raise KeyboardInterrupt
+    return ch
