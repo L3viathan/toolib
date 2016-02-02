@@ -463,6 +463,7 @@ def runtime(how_many_tries=10):
         def wrapper(*args, **kwargs):
             eprint("Timing {} with {} tries".format(fn.__name__, how_many_tries))
             times = []
+            ret = None # just in case how_many_tries is set to 0
             for i in range(how_many_tries):
                 beginning = time.time()
                 ret = fn(*args, **kwargs)
