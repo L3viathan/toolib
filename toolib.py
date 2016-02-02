@@ -421,9 +421,19 @@ def nested_loop(n, l):
 
     As should be obvious from the name, this is a replacement for deeply
     nested loops. If you consider using it, first consider not using it.
+
+    It turns:
+    for x in range(3):
+        for y in range(3):
+            print(x, y)
+
+    into:
+
+    for x, y in nested_loops(2, 3):
+        print(x, y)
     """
-    # intentionally violating PEP 8, because it's not readable anyways.
-    return ((tuple((c // l**x % l for x in reversed(range(n))))) for c in range(l**n))
+    for c in range(l ** n):
+        yield tuple(c // l**x % l for x in reversed(range(n)))
 
 
 def argmap(map_fn):
@@ -486,7 +496,15 @@ def nop(something):
 
 
 def getchr():
-    """Get a single key from the terminal without printing it."""
+    """
+    Get a single key from the terminal without printing it.
+
+    Certain special keys return several "characters", all starting with the
+    escape character '\x1b'. You could react to that by reading two more
+    characters, but the actual escape key will only make this return a single
+    escape character, and since it's blocking, that wouldn't be a good solution
+    either.
+    """
     fd = sys.stdin.fileno()
     old = termios.tcgetattr(fd)
     tty.setraw(sys.stdin.fileno())
