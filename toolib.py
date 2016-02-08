@@ -514,3 +514,31 @@ def getchr():
     if ord(ch) == 3:  # ^C
         raise KeyboardInterrupt
     return ch
+
+
+def fuzzy_match(req, ls):
+    """
+    Given a list of candidates and a partial string, return the 'best' match.
+
+    >>> l = ["apple", "orange", "banana", "pear"]
+    >>> fuzzy_match("p", l)
+    pear
+    >>> fuzzy_match("pp", l)
+    apple
+    >>> fuzzy_match("oe", l)
+    orange
+
+    """
+    if req == "": return False
+    for candidate in ls:
+        reqc = req
+        formatted = ""
+        for char in candidate:
+            if len(reqc) and char.lower() == reqc[0]:
+                reqc = reqc[1:]
+                formatted += char
+            else:
+                formatted += char
+        if len(reqc) == 0:
+            return candidate
+    return False
