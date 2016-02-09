@@ -25,3 +25,7 @@ Whenever I write a function or class I feel I'll need at some point in the futur
 `runtime` is a decorator to run a function *n* times, and measure the time. The result of the last call is returned.
 
 `nop` returns the first argument.
+
+`fuzzy_match` returns the best match (if any) of an input string in a list of candidate strings. Look in the code to see what "match" means.
+
+`most` is like the builtins `any` and `all`, in that it checks whether *most* of the iterable is truthy, and not like them in that it's kind of a joke.

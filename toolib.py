@@ -542,3 +542,11 @@ def fuzzy_match(req, ls):
         if len(reqc) == 0:
             return candidate
     return False
+
+
+def most(iterable):
+    """Returns True if 'most' elements are truthy."""
+    truthiness = 0
+    for element in iterable:
+        truthiness += 1 if element else -1
+    return truthiness > 0
