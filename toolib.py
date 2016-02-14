@@ -497,7 +497,7 @@ def nop(something):
 
 
 def getchr():
-    """
+    r"""
     Get a single key from the terminal without printing it.
 
     Certain special keys return several "characters", all starting with the
@@ -545,7 +545,7 @@ def fuzzy_match(req, ls):
 
 
 def most(iterable):
-    """Returns True if 'most' elements are truthy."""
+    """Return True if 'most' elements are truthy."""
     truthiness = 0
     for element in iterable:
         truthiness += 1 if element else -1
