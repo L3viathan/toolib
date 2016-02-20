@@ -1,8 +1,16 @@
+"""Natural Language Processing tools."""
+
 import re
 import operator
 from collections import defaultdict, Counter
 from itertools import combinations
 from functools import reduce
+
+
+class ParseError(Exception):
+    """Raised when a parse error occurs."""
+
+    pass
 
 
 class Tree(object):
@@ -169,7 +177,7 @@ class Tree(object):
         for child in self.children:
             if child.label == name:
                 if ret:
-                    raise AttributeError("More than one node of type {}".format(name))
+                    raise AttributeError("More than one node of type " + name)
                 ret = child
         return ret
 
@@ -202,7 +210,11 @@ class PTree(Tree):
 
         Because we want the wrapper "Tree.from_string" only on the top level.
         """
-        annotated_label = self.label + (":" + str(self.prob) if self.prob != 1 else "")
+        if self.prob != 1:
+            annotated_label = self.label + ":" + str(self.prob)
+        else:
+            annotated_label = self.label
+
         if self.leaf:
             return annotated_label
         else:
@@ -255,7 +267,8 @@ class ContextFreeLanguage(object):
         """
         Given a file-like object containing PTB-like trees, learn a grammar.
 
-        The trees should be in Chomsky-Normal-Form.
+        The trees should be in Chomsky-Normal-Form, although non-terminal unary
+        rules will work.
         """
         self.POS_collection = defaultdict(set)
         for tree in Tree._trees(Tree._tokenize(fileobject.read())):
@@ -264,14 +277,21 @@ class ContextFreeLanguage(object):
         for key in self._rule_counts:
             total = sum(self._rule_counts[key].values())
             for children in self._rule_counts[key]:
-                self.rules[key].add((*children, self._rule_counts[key][children] / total))
+                (self.rules[key]
+                 .add((*children, self._rule_counts[key][children] / total))
+                 )
 
         for key in self._lex_counts:
             total = sum(self._lex_counts[key].values())
             for label in self._lex_counts[key]:
-                self.lexicon[key].add((label, self._lex_counts[key][label] / total))
+                (self.lexicon[key]
+                 .add((label, self._lex_counts[key][label] / total))
+                 )
 
-        self.default_POS = max(self.POS_collection, key=lambda x: len(self.POS_collection[x]))
+        self.default_POS = max(
+                self.POS_collection,
+                key=lambda x: len(self.POS_collection[x]),
+                )
 
     def count_tree(self, tree):
         """Given a tree object, add it to the statistics."""
@@ -290,7 +310,8 @@ class ContextFreeLanguage(object):
                 # unary rules. Not in CNF, but maybe acceptable.
                 self._rule_counts[node.label][node.children[0].label] += 1
             else:
-                raise ParseError("Trees must be in Chomsky-Normal Form (found node with more than 2 children)")
+                raise ParseError("Trees must be in Chomsky-Normal Form "
+                                 "(found node with more than 2 children)")
 
     def parse(self, sentence):
         """
@@ -298,6 +319,22 @@ class ContextFreeLanguage(object):
 
         This uses the CYK parsing algorithm.
         """
+        def walk_chart(length):
+            for i in range(1, length):
+                for j in range(length-i):
+                    yield i, j
+
+        def pairings(iterable1, iterable2):
+            for item1 in iterable1:
+                for item2 in iterable2:
+                    yield item1, item2
+
+        def get_rules(rules, arity=2):
+            for key, rule_items in self.rules.items():
+                for *kids, prob in rule_items:
+                    if len(kids) == arity:
+                        yield key, kids, prob
+
         chart = defaultdict(list)
         sentence = sentence.split()
         for index, word in enumerate(sentence):
@@ -312,35 +349,28 @@ class ContextFreeLanguage(object):
                 leaf = PTree(word)
                 tree.children = [leaf]
                 chart[(index, index)].append(tree)
-            for key, rule_items in self.rules.items(): # now unary things
-                for *rule_lr, prob in rule_items:
-                    if len(rule_lr) == 1:
-                        for element in chart[index, index]:
-                            if rule_lr[0] == element.label:
-                                tree = PTree(key, prob)
-                                tree.children = [element]
-                                chart[index, index].append(tree)
+            for element in chart[index, index]:
+                for key, kids, prob in get_rules(self.rules, arity=1):
+                    if kids[0] == element.label:
+                        tree = PTree(key, prob)
+                        tree.children = [element]
+                        chart[index, index].append(tree)
 
         length = len(sentence)
-        for i in range(1, length):
-            for j in range(length-i):
-                for k in range(i):
-                    for left in chart[j, j+k]:
-                        for right in chart[j+1+k,i+j]:
-                            for key, rule_items in self.rules.items():
-                                for *rule_lr, prob in rule_items:
-                                    if len(rule_lr) == 2 and rule_lr[0] == left.label and rule_lr[1] == right.label:
-                                        tree = PTree(key, prob)
-                                        tree.children = [left, right]
-                                        chart[j, i+j].append(tree)
-                for key, rule_items in self.rules.items(): # now unary things
-                    for *rule_lr, prob in rule_items:
-                        if len(rule_lr) == 1:
-                            for element in chart[j, i+j]:
-                                if rule_lr[0] == element.label:
-                                    tree = PTree(key, prob)
-                                    tree.children = [element]
-                                    chart[j, i+j].append(tree)
+        for i, j in walk_chart(length):
+            for k in range(i):
+                for left, right in pairings(chart[j, j+k], chart[j+1+k, i+j]):
+                    for key, kids, prob in get_rules(self.rules, arity=2):
+                        if (kids[0], kids[1]) == (left.label, right.label):
+                            tree = PTree(key, prob)
+                            tree.children = [left, right]
+                            chart[j, i+j].append(tree)
+            for element in chart[j, i+j]:
+                for key, kids, prob in get_rules(self.rules, arity=1):
+                    if kids[0] == element.label:
+                        tree = PTree(key, prob)
+                        tree.children = [element]
+                        chart[j, i+j].append(tree)
         return chart[0, length-1]
 
     def POS_hook(self, word):
@@ -353,6 +383,11 @@ class ContextFreeLanguage(object):
         return self.default_POS
 
     def get_probability(self, sentence):
+        """
+        Return the probability of a given sentence.
+
+        This sums up the probability of all parsed trees.
+        """
         return sum(tree.probability for tree in self.parse(sentence))
 
 if __name__ == '__main__':

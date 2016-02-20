@@ -101,7 +101,7 @@ class DirectedGraph:
         """
         active_nodes = self.nodes.copy()
         while active_nodes:
-            for node in list(active_nodes): # list() for the copy
+            for node in list(active_nodes):  # list() for the copy
                 if all(x not in active_nodes for x in self.edges_in[node]):
                     yield node
                     active_nodes.remove(node)
@@ -170,6 +170,7 @@ class CSV(object):
             for line in f:
                 pass
     """
+
     def __init__(self, fileobject, **kwargs):
         """Initialize a CSV object.
 
@@ -185,10 +186,10 @@ class CSV(object):
                     }
             self.reader = csv.reader(self.fileobject, **arguments)
             if kwargs.get("header", True):
-                data = list(CSV.makeidentifier(next(self.reader)))
+                data = list(CSV._makeidentifier(next(self.reader)))
                 self.Row = namedtuple("Row", data)
             else:
-                self.Row = None # get later
+                self.Row = None  # get later
         elif self.fileobject.writable():
             arguments = {
                     "delimiter": kwargs.get("delimiter", ","),
@@ -202,7 +203,10 @@ class CSV(object):
         """Return a namedtuple."""
         if self.Row is None:
             data = next(self.reader)
-            self.Row = namedtuple("Row", ["col" + str(i) for i,_ in enumerate(data)])
+            self.Row = namedtuple(
+                    "Row",
+                    ["col" + str(i) for i, _ in enumerate(data)],
+                    )
             return self.Row(*data)
         else:
             return self.Row(*next(self.reader))
@@ -215,23 +219,28 @@ class CSV(object):
         return lines
 
     def __iter__(self):
+        """Return self, because __next__ handles iteration."""
         return self
 
     def __next__(self):
+        """Magic method for iteration."""
         return self.readline()
 
     def write(self, line):
-        """Writes a single line to the file."""
+        """Write a single line to the file."""
         self.writer.writerow(line)
 
     def __enter__(self):
+        """Context manager entry: Do nothing."""
         return self
 
     def __exit__(self, *args):
+        """Close file object when leaving context."""
         self.fileobject.close()
 
     @staticmethod
-    def makeidentifier(some_list):
+    def _makeidentifier(some_list):
+        """Lazy way to make columns behave. May not always work."""
         for item in some_list:
             try:
                 int(item[0])
@@ -322,16 +331,24 @@ def runtime(how_many_tries=10):
     """Decorate function to measure its runtime."""
     def decorator(fn):
         def wrapper(*args, **kwargs):
-            eprint("Timing {} with {} tries".format(fn.__name__, how_many_tries))
+            eprint("Timing {} with {} tries".format(
+                fn.__name__,
+                how_many_tries,
+                ))
             times = []
-            ret = None # just in case how_many_tries is set to 0
+            ret = None  # just in case how_many_tries is set to 0
             for i in range(how_many_tries):
                 beginning = time.time()
                 ret = fn(*args, **kwargs)
                 runtime = time.time() - beginning
                 times.append(runtime)
-                eprint("Run {0} completed in {1:.3f} seconds".format(i+1, runtime))
-            eprint("All runs done. Average time: {0:.3f}".format(sum(times)/len(times)))
+                eprint("Run {0} completed in {1:.3f} seconds".format(
+                    i+1,
+                    runtime,
+                    ))
+            eprint("All runs done. Average time: {0:.3f}".format(
+                sum(times)/len(times)
+                ))
             return ret
         return wrapper
     return decorator
@@ -390,7 +407,8 @@ def fuzzy_match(req, ls):
     orange
 
     """
-    if req == "": return False
+    if req == "":
+        return False
     for candidate in ls:
         reqc = req
         formatted = ""
