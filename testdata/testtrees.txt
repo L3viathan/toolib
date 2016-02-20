@@ -1,0 +1,4 @@
+(S (NP (Det the) (N man)) (VP (V sees) (NP (Det the) (N woman))))
+(NP (NP (Det the)(N bottle)) (PP (P with) (NP (Det a) (N label))))
+(S (NP (Det the) (N man)) (VP (V sleeps)))
+(S (NP (NE Peter)) (VP (VP (V eats) (NP (Det some)(N bread))) (PP (P on) (NP (POSS my) (N table)))))

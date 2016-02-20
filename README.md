@@ -2,13 +2,20 @@
 
 Whenever I write a function or class I feel I'll need at some point in the future, I'll put it here.
 
-##Classes
+##Modules
 
-`Tree` (and its child `PTree`) is in an implementation of simple parse trees. They can be created manually, or from either PTB or qtree format. PTree adds probabilities to the nodes.
+`nlp` contains:
+
+- `Tree` (and its child `PTree`) is in an implementation of simple parse trees. They can be created manually, or from either PTB or qtree format. PTree adds probabilities to the nodes.
+- `ContextFreeLanguage`, which contains a CYK parser (and a method for estimating probabiities based on a PTB-like corpus).
+
+##Classes
 
 `DirectedGraph` is a naive implementation of a directed graph that was the result of a homework in a Python course I once did. It still works, but is in need of a rewrite.
 
 `Heap` is a wrapper around a list with the `heapq` module of the standard library that accepts a key argument, which can be used to have heaps that are sorted by something else than the standard key.
+
+`CSV` is a simple wrapper for csv files. Returns namedtuples, can write from tuples. Nicer than `csv.writer` and `csv.reader`, imho. May break with some files, though, so don't use in production.
 
 ##Functions
 
