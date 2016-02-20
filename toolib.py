@@ -550,3 +550,9 @@ def most(iterable):
     for element in iterable:
         truthiness += 1 if element else -1
     return truthiness > 0
+
+
+def limit(iterable, number=10):
+    """Yield the top n elements of an iterable, like 'head' on unix."""
+    for x, _ in zip(iterable, range(number)):
+        yield x

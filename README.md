@@ -29,3 +29,5 @@ Whenever I write a function or class I feel I'll need at some point in the futur
 `fuzzy_match` returns the best match (if any) of an input string in a list of candidate strings. Look in the code to see what "match" means.
 
 `most` is like the builtins `any` and `all`, in that it checks whether *most* of the iterable is truthy, and not like them in that it's kind of a joke.
+
+`limit` yields the first couple of elements of an iterable (think `head`).
