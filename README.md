@@ -7,7 +7,9 @@ Whenever I write a function or class I feel I'll need at some point in the futur
 `nlp` contains:
 
 - `Tree` (and its child `PTree`) is in an implementation of simple parse trees. They can be created manually, or from either PTB or qtree format. PTree adds probabilities to the nodes.
-- `ContextFreeLanguage`, which contains a CYK parser (and a method for estimating probabiities based on a PTB-like corpus).
+- `ContextFreeLanguage`, which contains a CYK parser (and a method for estimating probabiities based on a PTB-like corpus). This might not be optimized for large corpora yet.
+
+`tools` contains the rest. See below.
 
 ##Classes
 
