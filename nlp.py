@@ -258,8 +258,8 @@ class ContextFreeLanguage(object):
         """
         self._rule_counts = defaultdict(Counter)
         self._lex_counts = defaultdict(Counter)
-        self.rules = defaultdict(set)
-        self.lexicon = defaultdict(set)
+        self.rules = defaultdict(dict)
+        self.lexicon = defaultdict(dict)
         for key in kwargs:
             setattr(self, key, kwargs[key])
 
@@ -277,16 +277,12 @@ class ContextFreeLanguage(object):
         for key in self._rule_counts:
             total = sum(self._rule_counts[key].values())
             for children in self._rule_counts[key]:
-                (self.rules[key]
-                 .add((*children, self._rule_counts[key][children] / total))
-                 )
+                self.rules[key][children] = self._rule_counts[key][children] / total
 
         for key in self._lex_counts:
             total = sum(self._lex_counts[key].values())
             for label in self._lex_counts[key]:
-                (self.lexicon[key]
-                 .add((label, self._lex_counts[key][label] / total))
-                 )
+                self.lexicon[key][label] = self._lex_counts[key][label] / total
 
         self.default_POS = max(
                 self.POS_collection,
@@ -331,21 +327,21 @@ class ContextFreeLanguage(object):
 
         def get_rules(rules, arity=2):
             for key, rule_items in self.rules.items():
-                for *kids, prob in rule_items:
+                for kids in rule_items:
                     if len(kids) == arity:
-                        yield key, kids, prob
+                        yield key, kids, rule_items[kids]
 
         chart = defaultdict(list)
         sentence = sentence.split()
         for index, word in enumerate(sentence):
             if self.lexicon[word]:
-                for label, prob in self.lexicon[word]:
-                    tree = PTree(label, prob)
+                for label in self.lexicon[word]:
+                    tree = PTree(label, self.lexicon[word][label])
                     leaf = PTree(word)
                     tree.children = [leaf]
                     chart[(index, index)].append(tree)
             else:
-                tree = PTree(self.POS_hook(word), prob)
+                tree = PTree(self.POS_hook(word), self.lexicon[word][label])
                 leaf = PTree(word)
                 tree.children = [leaf]
                 chart[(index, index)].append(tree)
