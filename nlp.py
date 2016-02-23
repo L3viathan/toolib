@@ -26,6 +26,8 @@ class Tree(object):
         """Return the number of nodes in the subtree."""
         return 1 + sum(child.size for child in self.children)
 
+    __len__ = size
+
     @property
     def depth(self):
         """Return the depth."""
@@ -121,6 +123,14 @@ class Tree(object):
             kids = ' '.join(child._repr() for child in self.children)
             return '({} {})'.format(self.label, kids)
 
+    def __eq__(self, other):
+        """Check for equality."""
+        return repr(self) == repr(other)
+
+    def __format__(self, _):
+        """Represent the tree in new-style string formatting."""
+        return self._repr()
+
     def qtree(self):
         r"""Return something like \Tree [.S [.NP Peter ] [.VP sleeps ] ]."""
         return "\\Tree " + self._qtree()
@@ -167,7 +177,7 @@ class Tree(object):
         """Convenience function for accessing children."""
         return self.children[index]
 
-    def __copy__(self):
+    def __deepcopy__(self):
         """Return a deep copy of the tree."""
         return type(self).from_string(self._repr())
 
