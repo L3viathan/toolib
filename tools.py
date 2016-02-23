@@ -436,6 +436,11 @@ def limit(iterable, number=10):
     for x, _ in zip(iterable, range(number)):
         yield x
 
+
+def exhaust(iterator, n):
+    """Exhaust an iterator."""
+    deque(iterator, maxlen=0)
+
 if __name__ == '__main__':
     with CSV(open("testfile.csv", "r")) as c:
         for line in c:
