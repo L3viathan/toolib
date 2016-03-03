@@ -3,11 +3,12 @@
 import heapq
 import time
 import sys
+import csv
 import termios
 import tty
 import operator
 from functools import reduce
-from collections import defaultdict, deque
+from collections import defaultdict, deque, namedtuple
 
 
 class DirectedGraph:
@@ -437,7 +438,7 @@ def limit(iterable, number=10):
         yield x
 
 
-def exhaust(iterator, n):
+def exhaust(iterator):
     """Exhaust an iterator."""
     deque(iterator, maxlen=0)
 
