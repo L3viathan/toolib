@@ -245,9 +245,9 @@ class CSV(object):
         for item in some_list:
             try:
                 int(item[0])
-                yield "_" + item.replace(" ", "")
+                yield "_" + item.replace(" ", "").replace("-","_")
             except:
-                yield item.replace(" ", "")
+                yield item.replace(" ", "").replace("-","_")
 
 
 def parametrized(dec):
@@ -441,6 +441,27 @@ def limit(iterable, number=10):
 def exhaust(iterator):
     """Exhaust an iterator."""
     deque(iterator, maxlen=0)
+
+
+def pairwise(iterable):
+    """Iterate over pairs of an iterable."""
+    i = iter(iterable)
+    j = iter(iterable)
+    next(j)
+    yield from zip(i, j)
+
+def nwise(iterable, n):
+    """
+    Iterate over n-grams of an iterable.
+
+    Has a bit of an overhead compared to pairwise (although only during
+    initialization), so the two functions are implemented independently.
+    """
+    iterables = [iter(iterable) for _ in range(n)]
+    for index, it in enumerate(iterables):
+        for _ in range(index):
+            next(it)
+    yield from zip(*iterables)
 
 if __name__ == '__main__':
     with CSV(open("testfile.csv", "r")) as c:
