@@ -13,8 +13,6 @@ Whenever I write a function or class I feel I'll need at some point in the futur
 
 ##Classes
 
-`DirectedGraph` is a naive implementation of a directed graph that was the result of a homework in a Python course I once did. It still works, but is in need of a rewrite.
-
 `Heap` is a wrapper around a list with the `heapq` module of the standard library that accepts a key argument, which can be used to have heaps that are sorted by something else than the standard key.
 
 `CSV` is a simple wrapper for csv files. Returns namedtuples, can write from tuples. Nicer than `csv.writer` and `csv.reader`, imho. May break with some files, though, so don't use in production.
