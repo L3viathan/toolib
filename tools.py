@@ -91,8 +91,7 @@ class DirectedGraph:
 
     def bfs(self, node):
         """Yield all nodes in breadth-first search."""
-        for x in self.dfs(node, deque.popleft):
-            yield x
+        yield from self.dfs(node, deque.popleft)
 
     def tsort(self):
         """
@@ -245,9 +244,9 @@ class CSV(object):
         for item in some_list:
             try:
                 int(item[0])
-                yield "_" + item.replace(" ", "").replace("-","_")
+                yield "_" + item.replace(" ", "").replace("-", "_")
             except:
-                yield item.replace(" ", "").replace("-","_")
+                yield item.replace(" ", "").replace("-", "_")
 
 
 def parametrized(dec):
@@ -449,6 +448,7 @@ def pairwise(iterable):
     j = iter(iterable)
     next(j)
     yield from zip(i, j)
+
 
 def nwise(iterable, n):
     """
