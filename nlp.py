@@ -99,12 +99,35 @@ class Tree(object):
                 raise StopIteration
             yield cls._tree(tokens)
 
+    def parentize(self):
+        for child in self.children:
+            child.parent = self
+            child.parentize()
+
+    def treeview(self, prefix=""):
+        ret = prefix
+        if self.parent is not None:
+            if self is self.parent.children[-1]:
+                ret += "└─"
+            else:
+                ret += "├─"
+        ret += self.label + ("\n" if self.children else "")
+        if self.parent is None:
+            ret += "\n".join(child.treeview(prefix) for child in self.children)
+        elif self is not self.parent.children[-1]:
+            ret += "\n".join(child.treeview(prefix+"│ ") for child in self.children)
+        else:
+            ret += "\n".join(child.treeview(prefix+"  ") for child in self.children)
+        return ret
+
     def __str__(self):
         """
         Return the PTB notation of the tree.
 
         In addition, return the sentence level, i.e. all leaves.
         """
+        self.parentize()
+        return self.treeview()
         return """{}\n{}\n""".format(repr(self), self.text)
 
     def __repr__(self):
@@ -400,5 +423,6 @@ if __name__ == '__main__':
     with open("testdata/testtrees.txt") as f:
         english = ContextFreeLanguage()
         english.learn_grammar(f)
-        print(english.parse("the woman eats with my man"))
-        print(english.get_probability("the woman eats with my man"))
+        trees = english.parse("the woman eats with my man")
+        print(trees[0])
+        print(english.get_probability("the woman eats with my man"), "should be 0.004629629629629629")
