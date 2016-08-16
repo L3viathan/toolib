@@ -7,6 +7,7 @@ import csv
 import termios
 import tty
 import operator
+import random
 from functools import reduce
 from collections import defaultdict, deque, namedtuple
 
@@ -366,6 +367,21 @@ def nwise(iterable, n):
         for _ in range(index):
             next(it)
     yield from zip(*iterables)
+
+
+def weighted_choice(choices):
+    """
+    Weighted version of random.choice.
+    Takes a dictionary of choices to weights. Weights can be percentages or
+    any kind of weigth, they will be normalized.
+    """
+    N = sum(choices.values())
+    rand = random.random()
+    for candidate, weight in choices.items():
+        if rand <= weight/N:
+            return candidate
+        else:
+            rand -= weight/N
 
 if __name__ == '__main__':
     with CSV(open("testfile.csv", "r")) as c:
