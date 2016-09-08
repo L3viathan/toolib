@@ -1,6 +1,8 @@
 import operator as op
 from functools import partial
 
+__all__ = ["ƒ", "functional_magic"]
+
 class Magic(object):
     # TODO: implement methodcaller
     # Design decision (for now): only implement operators and ...getters, not
