@@ -336,10 +336,17 @@ def most(iterable):
     return truthiness > 0
 
 
-def limit(iterable, number=10):
+def head(iterable, number=10):
     """Yield the top n elements of an iterable, like 'head' on unix."""
     for x, _ in zip(iterable, range(number)):
         yield x
+
+def tail(iterable, number=10):
+    """Yield the last n elements of an iterable, like 'tail' on unix."""
+    t = deque(maxlen=number)
+    for x in iterable:
+        t.append(x)
+    yield from t
 
 
 def exhaust(iterator):

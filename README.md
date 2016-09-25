@@ -64,4 +64,5 @@ candidate strings. Look in the code to see what "match" means.
 `most` is like the builtins `any` and `all`, in that it checks whether *most*
 of the iterable is truthy, and not like them in that it's kind of a joke.
 
-`limit` yields the first couple of elements of an iterable (think `head`).
+`head` yields the first couple of elements of an iterable, `tail` the last
+couple of elements.
