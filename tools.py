@@ -10,6 +10,7 @@ import operator
 import random
 from functools import reduce
 from collections import defaultdict, deque, namedtuple
+from itertools import zip_longest
 
 
 class Heap(list):
@@ -389,6 +390,33 @@ def weighted_choice(choices):
             return candidate
         else:
             rand -= weight/N
+
+
+def multimap(iterable, *maps):
+    """
+    Map a different function to each element of an iterable.
+
+    One of the usecases is when parsing some string with different types
+    "inside". Normally, you would have to do:
+    >>> a, b, c, d = "13,Haha,True,-3".split(",")
+    >>> a, c, d = int(a), bool(c), int(d)
+    >>> a, b, c, d
+    (13, 'Haha', True, -3)
+
+    Using multimap, you can instead do:
+    >>> a, b, c, d = multimap("13,Haha,True,-3".split(","), int, None, bool, int)
+    >>> a, b, c, d
+    (13, 'Haha', True, -3)
+
+    If None is given as a function, multimap leaves the corresponding element
+    untouched. If you give fewer functions than items in the iterable, the last
+    ones will be untouched as well.
+    """
+    for fn, element in zip_longest(maps, iterable):
+        if fn is not None:
+            yield fn(element)
+        else:
+            yield element
 
 if __name__ == '__main__':
     with CSV(open("testfile.csv", "r")) as c:
