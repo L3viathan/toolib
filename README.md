@@ -53,6 +53,10 @@ Please note that parametrized was not written by me.
 `argmap` is a decorator that maps some function over all arguments, e.g. to
 turn them all to lowercase.
 
+`multimap` is a function that takes an iterable and a bunch of functions (or
+None) as additional arguments: The first function is applied to the first
+element of the iterable, and so on.
+
 `runtime` is a decorator to run a function *n* times, and measure the time. The
 result of the last call is returned.
 
