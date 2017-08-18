@@ -1,9 +1,9 @@
-#toolib
+# toolib
 
 Whenever I write a function or class I feel I'll need at some point in the
 future, I'll put it here.
 
-##Modules
+## Modules
 
 `nlp` contains:
 
@@ -26,7 +26,7 @@ that. In fact, I don't really recommend using this at all.
 
 `tools` contains the rest. See below.
 
-##Classes
+## Classes
 
 `Heap` is a wrapper around a list with the `heapq` module of the standard
 library that accepts a key argument, which can be used to have heaps that are
@@ -36,7 +36,7 @@ sorted by something else than the standard key.
 tuples. Nicer than `csv.writer` and `csv.reader`, imho. May break with some
 files, though, so don't use in production.
 
-##Functions
+## Functions
 
 `nested_loop` is a simple function to avoid having to create deeply nested
 loops.
