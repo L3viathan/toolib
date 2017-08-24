@@ -331,10 +331,8 @@ def fuzzy_match(req, ls):
 
 def most(iterable):
     """Return True if 'most' elements are truthy."""
-    truthiness = 0
-    for element in iterable:
-        truthiness += 1 if element else -1
-    return truthiness > 0
+    truthiness = [*map(bool, iterable)]
+    return sum(truthiness) > (len(truthiness)//2)
 
 
 def head(iterable, number=10):
@@ -355,10 +353,10 @@ def exhaust(iterator):
     deque(iterator, maxlen=0)
 
 
-def pairwise(iterable):
-    """Iterate over pairs of an iterable."""
-    i = iter(iterable)
-    j = iter(iterable)
+def pairwise(sequence):
+    """Iterate over pairs of a sequence."""
+    i = iter(sequence)
+    j = iter(sequence)
     next(j)
     yield from zip(i, j)
 
