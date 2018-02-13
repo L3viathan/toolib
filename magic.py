@@ -8,7 +8,7 @@ class Magic(object):
     # Design decision (for now): only implement operators and ...getters, not
     # stuff like abs() or bool()
     def __init__(self, *, is_original=True):
-        self.is_original=is_original
+        self.is_original = is_original
         self.__ops = []
         self.__repr = 'ƒ'
         self.__last_prec = 18
@@ -39,24 +39,24 @@ class Magic(object):
         '''
         if self.is_original:
             return type(self)(is_original=False)._add_function(
-                    function,
-                    left=left,
-                    right=right,
-                    prec=prec,
-                    )
+                function,
+                left=left,
+                right=right,
+                prec=prec,
+            )
         if prec > self.__last_prec:
             self.__repr = '{left}({previous}){right}'.format(
-                    left=left,
-                    right=right,
-                    previous=self.__repr,
-                    )
+                left=left,
+                right=right,
+                previous=self.__repr,
+            )
             self.__last_prec = prec
         else:
             self.__repr = '{left}{previous}{right}'.format(
-                    left=left,
-                    right=right,
-                    previous=self.__repr,
-                    )
+                left=left,
+                right=right,
+                previous=self.__repr,
+            )
             self.__last_prec = prec
         self.__ops.append(function)
         return self
@@ -71,7 +71,7 @@ class Magic(object):
         if attr.startswith('___'):
             attr = attr[1:]
         elif attr.startswith('__'):
-           raise AttributeError(item)
+            raise AttributeError(attr)
         return self._add_function(op.attrgetter(attr), right='.'+attr, prec=16)
 
     def __getitem__(self, item):
@@ -104,11 +104,11 @@ class Magic(object):
 
     def __neg__(self):
         ''' -ƒ '''
-        return self._add_function(partial(op.neg, other), left='-', prec=13)
+        return self._add_function(partial(op.neg), left='-', prec=13)
 
     def __not__(self):
         ''' not ƒ'''
-        return self._add_function(partial(op.not_, other), left='not ', prec=6)
+        return self._add_function(partial(op.not_), left='not ', prec=6)
 
     def __or__(self, other):
         ''' ƒ | foo '''
