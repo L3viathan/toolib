@@ -13,8 +13,7 @@ def retry(tries):
                     ex = e
                 else:
                     return val
-            if ex is not None:
-                raise ex
+            raise ex
         return wrapper
     return decorator
 
